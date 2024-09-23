@@ -158,3 +158,89 @@ public function main() returns error? {
     // RemoveProductResponse remove_productResponse = check ep->remove_product(remove_productRequest);
     // io:println(remove_productResponse);
 }
+public function createUsers() returns CreateUserResponse?|error {
+    // Create a streaming client to send user creation requests
+    Create_usersStreamingClient create_usersStreamingClient = check ep->create_users();
+
+    while (true) {
+        // Interactively collect user input
+        io:println("Enter user information:");
+        string userId = io:readln("User ID: ");
+        io:println("User Type (CUSTOMER/ADMIN): ");
+        string userTypeInput = io:readln();
+        
+        UserType userType;
+        if (userTypeInput == "CUSTOMER") {
+            userType = CUSTOMER;
+        } else if (userTypeInput == "ADMIN") {
+            userType = ADMIN;
+        } else {
+            io:println("Invalid user type. Using default: CUSTOMER");
+            userType = CUSTOMER;
+        }
+
+        // Create a CreateUserRequest
+        CreateUserRequest createUserRequest = {
+            user_id: userId,
+            user_type: userType
+        };
+
+        // Send the CreateUserRequest to the server
+        check create_usersStreamingClient->sendCreateUserRequest(createUserRequest);
+
+        // Ask the user if they want to create another user
+        io:println("Do you want to create another user? (yes/no): ");
+        string continueInput = io:readln();
+
+        if (continueInput != "yes") {
+            break;
+        }
+    }
+
+    // Complete the streaming client
+    check create_usersStreamingClient->complete();
+
+    // Receive the CreateUserResponse from the server
+    CreateUserResponse? createUserResponse = check create_usersStreamingClient->receiveCreateUserResponse();
+
+    return createUserResponse;
+}
+
+// Function to interactively collect product information for adding a product
+function getproductInfoFromInput() returns AddProductRequest {
+    io:println("Enter product information:");
+
+    // Read product name from input
+    string name = io:readln("Name: ");
+
+    // Read product author(s) from input
+    string Description = io:readln("description: ");
+    string Price = io:readln("Price: ");
+
+    // Read product stkQuantity from input
+    string stkQuantity = io:readln();
+
+    // Read product SKU from input
+    string SKU = io:readln("SKU: ");
+
+    AddProductRequest addProductRequest = {
+        name: name,
+        description: Description,
+        price: Price,
+        stkQuantity: stkQuantity,
+        SKU: SKU
+    };
+
+    return addProductRequest;
+}
+
+// Function to add a product to the Shop
+function addproduct() returns AddProductResponse|error {
+    // Interactively collect product information
+    AddProductRequest addProductRequest = getproductInfoFromInput();
+
+    // Invoke the add_product gRPC function with the product information
+    AddProductResponse|error AddProductResponse = ep->add_product(addProductRequest);
+
+    return AddProductResponse;
+}
