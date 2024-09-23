@@ -244,3 +244,98 @@ function addproduct() returns AddProductResponse|error {
 
     return AddProductResponse;
 }
+function getUpdatedproductInfoFromInput() returns UpdateProductRequest {
+    // Read product SKU from input
+    string SKU = io:readln("Enter the SKU of the product to update: ");
+
+    // Read updated product name from input
+    string updatedname = io:readln("Updated Name: ");
+
+    // Read updated product author(s) from input
+    string updatedDescription = io:readln("Updated description: ");
+    string updatedPrice = io:readln("Updated Price (optional, press Enter to skip): ");
+
+    //Read updated Product stock quantity from input
+    string updatedstkQuantity = io:readln("Updated Stock Quantity");
+    
+    UpdateProductRequest updateroductRequest = {
+        SKU: SKU,
+        name: updatedname,
+        description: updatedDescription,
+        price: updatedPrice,
+        stkQuantity: updatedstkQuantity,      
+        };
+
+    return updateroductRequest;
+}
+
+// Function to update a product in the Shop
+function updateProduct() returns UpdateProductResponse|error {
+    // Interactively collect updated product information
+    UpdateProductRequest updateroductRequest = getUpdatedproductInfoFromInput();
+
+    // Invoke the update_product gRPC function with the updated product information
+    UpdateProductResponse|error updateProductResponse = ep->update_product(updateroductRequest);
+
+    return updateProductResponse;
+}
+
+// Function to interactively collect product information for removing a product
+function getRemoveproductInfoFromInput() returns RemoveProductRequest {
+    io:println("Enter product information to remove:");
+
+    // Read product SKU from input
+    string SKU = io:readln("Enter the SKU of the product to remove: ");
+
+    RemoveProductRequest removeProductRequest = {
+        SKU: SKU
+    };
+
+    return removeProductRequest;
+}
+
+// Function to remove a product from the Shop
+function removeproduct() returns RemoveProductResponse|error {
+    // Interactively collect product information to remove
+    RemoveProductRequest removeProductRequest = getRemoveproductInfoFromInput();
+
+    // Invoke the remove_product gRPC function with the product information to remove
+    RemoveProductResponse|error removeProductResponse = ep->remove_product(removeProductRequest);
+
+    return removeProductResponse;
+}
+
+// Function to interactively collect product SKU for locating a product
+function getproductSKUForLocateFromInput() returns SearchProductRequest {
+    // Read product SKU from input
+    string SKU = io:readln("Enter the SKU of the product to locate: ");
+
+    SearchProductRequest searchProductRequest = {
+        SKU: SKU
+    };
+
+    return searchProductRequest;
+}
+
+// Function to locate a product in the Shop based on SKU
+function searchProduct() returns SearchProductResponse|error {
+    // Interactively collect product SKU to locate
+    SearchProductRequest locateproductRequest = getproductSKUForLocateFromInput();
+
+    // Invoke the locate_product gRPC function with the product SKU
+    SearchProductResponse|error searchProductResponse = check ep->search_product(locateproductRequest);
+
+    return searchProductResponse;
+}
+
+
+// Function to list all available products in the Shop
+function listAvailableproducts() returns ListAvailableProductsResponse|error {
+    // Create an empty request for listing available products
+    ListAvailableProductsRequest listAvailableproductsRequest = {};
+
+    // Invoke the list_available_products gRPC function to get the list of available products
+    ListAvailableProductsResponse|error listAvailableproductsResponse = ep->list_available_products(listAvailableproductsRequest);
+
+    return listAvailableproductsResponse;
+}

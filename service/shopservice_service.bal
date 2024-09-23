@@ -86,4 +86,56 @@ service "ShopService" on ep {
         return {products: availableProducts};
 
     }
+    
 }
+remote function search_product(SearchProductRequest value) returns SearchProductResponse|error {
+             // Find the book to update based on the provided ISBN
+        ProductInfo|error productRequested = products.get(value.SKU);
+
+        if (productRequested is error) {
+            return error("Product not found");
+        }
+
+        return {location: productRequested.location, available: productRequested.available};
+
+    }
+    // remote function AddToCart(AddToCartRequest value) returns AddToCartResponse|error {
+    //}
+    //remote function PlaceOrder(PlaceOrderRequest value) returns PlaceOrderResponse|error {
+    //}
+    remote function create_users(stream<CreateUserRequest, grpc:Error?> clientStream) returns CreateUserResponse|error {
+    int totalUsersCreated = 0;
+        string errorMessage = "";
+
+        // Iterate through the streamed CreateUserRequest objects
+        check clientStream.forEach(function(CreateUserRequest userRequest) {
+            // Check if the user already exists in the users table to prevent duplicate entries
+            // User|error existingUser = users.get(userRequest.user_id);
+
+            // if (existingUser is error) {
+            //     errorMessage = "User with ID already exists: " + userRequest.user_id;
+            //     return;
+            // }
+
+            // Create a new user based on the CreateUserRequest and add it to the users table
+            User newUser = {
+                user_id: userRequest.user_id,
+                user_type: userRequest.user_type
+            };
+
+            users.add(newUser);
+            totalUsersCreated = totalUsersCreated + 1;
+        });
+
+        // Create the response based on the number of users created and error message
+        CreateUserResponse response;
+        if (errorMessage != "") {
+            response = { success: false, message: errorMessage };
+        } else {
+            response = { success: true, message: totalUsersCreated.toString() + " Users created successfully" };
+        }
+
+        return response;
+
+
+    }
