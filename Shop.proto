@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package shop;
+
+service ShopService {
+    // Admin operations
+    rpc add_product(AddProductRequest) returns (AddProductResponse);
+    rpc update_product(UpdateProductRequest) returns (UpdateProductResponse);
+    rpc remove_product(RemoveProductRequest) returns (RemoveProductResponse);
+
+    // Customer operations
+    rpc list_available_products(ListAvailableProductsRequest) returns (ListAvailableProductsResponse);
+    rpc search_product(SearchProductRequest) returns (SearchProductResponse);
+    rpc AddToCart(AddToCartRequest) returns (AddToCartResponse);
+    rpc PlaceOrder(PlaceOrderRequest) returns (PlaceOrderResponse);
+
+    // User management
+    rpc create_users(stream CreateUserRequest) returns (CreateUserResponse);
+}
+
+message AddProductRequest {
+    string name = 1;
+    string description = 2;
+    string price = 3;
+    int32 stkQuantity = 4;
+    string SKU = 5;
+}
+
+message AddProductResponse {
+    string SKU = 1;
+}
+
+message UpdateProductRequest {
+    string SKU = 1;
+    string name = 2;
+    string description = 3;
+    string price = 4;
+    int32 stkQuantity = 5;
+}
+
+message UpdateProductResponse {
+    string message = 1;
+}
+
+message RemoveProductRequest {
+    string SKU = 1;
+}
+
+message RemoveProductResponse {
+    repeated ProductInfo products = 1;
+}
+
+message ListAvailableProductsRequest {
+    // Add any request fields if needed.
+}
+
+message ListAvailableProductsResponse {
+    repeated ProductInfo products = 1;
+}
+
+message SearchProductRequest {
+    string SKU = 1;
+}
+
+message SearchProductResponse {
+    bool available = 1;
+}
+
+message CreateUserRequest {
+    string user_id = 1;
+    UserType user_type = 2;
+}
+
+message CreateUserResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+enum UserType {
+    CUSTOMER = 0;
+    ADMIN = 1;
+}
+
+message ProductInfo {
+    string name = 1;
+    string description = 2;
+    string price = 3;
+    int32 stkQuantity = 4;
+    string SKU = 5;
+    bool available = 6;
+}
+
+message AddToCartRequest {
+    string user_id = 1;
+    string SKU = 2;
+    int32 quantity = 3;
+}
+
+message AddToCartResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message PlaceOrderRequest {
+    string user_id = 1;
+    string cart_id = 2;
+}
+
+message PlaceOrderResponse {
+    bool success = 1;
+    string order_id = 2;
+    string message = 3;
+}
